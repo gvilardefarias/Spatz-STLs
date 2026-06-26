@@ -1,0 +1,13 @@
+// Copyright 2026 Politecnico di Torino
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for test data gen
+
+//    VLMAX: 128 for 32b and 64 for 64b
+{
+    tp_type: 'random',
+    LMUL:8,
+    SEW:64,
+    VLEN:512
+}
