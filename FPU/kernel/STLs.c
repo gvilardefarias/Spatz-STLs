@@ -36,8 +36,31 @@ int test_mul(double *a, double *b){
   };
 
   test_setup(a, b, &vconfig);
-
   for(int i = 0; i < FPU_COUNT; i++){
+    vfmul_vv_v16_v0_v8();
+    vslide1down_v0(a[i]); // i is equal to the number of strides performed
+    vslide1down_v8(b[i]);
+  }
+
+  vconfig.vtype.sew = e32;
+  vsetvl(&vconfig);
+  for(int i = FPU_COUNT; i < 2*FPU_COUNT; i++){
+    vfmul_vv_v16_v0_v8();
+    vslide1down_v0(a[i]); // i is equal to the number of strides performed
+    vslide1down_v8(b[i]);
+  }
+
+  vconfig.vtype.sew = e16;
+  vsetvl(&vconfig);
+  for(int i = 2*FPU_COUNT; i < 3*FPU_COUNT; i++){
+    vfmul_vv_v16_v0_v8();
+    vslide1down_v0(a[i]); // i is equal to the number of strides performed
+    vslide1down_v8(b[i]);
+  }
+
+  vconfig.vtype.sew = e8;
+  vsetvl(&vconfig);
+  for(int i = 2*FPU_COUNT; i < 3*FPU_COUNT; i++){
     vfmul_vv_v16_v0_v8();
     vslide1down_v0(a[i]); // i is equal to the number of strides performed
     vslide1down_v8(b[i]);
@@ -46,11 +69,11 @@ int test_mul(double *a, double *b){
 
 int test_procedure(double *a, double *b, double *c, test_t test){
   switch (test) {
-  case TEST_MUL:
-    return test_mul(a, b);
-  case TEST_ADD:
-    return 0;
-  default:
-    return -1;
+    case TEST_MUL:
+      return test_mul(a, b);
+    case TEST_ADD:
+      return 0;
+    default:
+      return -1;
   }
 }
