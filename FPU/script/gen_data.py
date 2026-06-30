@@ -46,7 +46,7 @@ def gen_tp(config_tp):
     tp = []
 
     if SEW != 32:
-        VLMAX = int(VLMAX * (32 / SEW))
+        VLMAX = int(VLMAX * (SEW / 32))
 
     if tp_type == "random":
         tp = np.random.randint(0, 2**32, size=(2, VLMAX), dtype=np.uint32)
@@ -80,7 +80,7 @@ def main():
     tp = gen_tp(config_tp)
     tp_str = mat2str(tp, "tp")
 
-    output_file = file_path / "tp_data.h"
+    output_file = file_path / f"tp_data_{config_tp['tp_type']}.h"
     with open(output_file, 'w') as f:
         f.write(gen_defines(config_tp) + "\n")
         f.write(tp_str)

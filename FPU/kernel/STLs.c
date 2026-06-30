@@ -19,8 +19,6 @@
 #include "STLs.h"
 #include <stddef.h>
 
-test_t test_ar[STL_NUM_TEST] = {TEST_MUL};
-
 
 void test_setup(double *a, double *b, vconfig_t *vconfig){
   vsetvl(vconfig);
@@ -29,51 +27,43 @@ void test_setup(double *a, double *b, vconfig_t *vconfig){
   vle64_v8(b);
 }
 
-int test_mul(double *a, double *b){
-  vconfig_t vconfig = {
-      .AVL   = -1,
-      .vtype = {.sew = e64, .lmul = m8},
-  };
-
-  test_setup(a, b, &vconfig);
-  for(int i = 0; i < FPU_COUNT; i++){
-    vfmul_vv_v16_v0_v8();
-    vslide1down_v0(a[i]); // i is equal to the number of strides performed
-    vslide1down_v8(b[i]);
-  }
-
-  vconfig.vtype.sew = e32;
-  vsetvl(&vconfig);
-  for(int i = FPU_COUNT; i < 2*FPU_COUNT; i++){
-    vfmul_vv_v16_v0_v8();
-    vslide1down_v0(a[i]); // i is equal to the number of strides performed
-    vslide1down_v8(b[i]);
-  }
-
-  vconfig.vtype.sew = e16;
-  vsetvl(&vconfig);
-  for(int i = 2*FPU_COUNT; i < 3*FPU_COUNT; i++){
-    vfmul_vv_v16_v0_v8();
-    vslide1down_v0(a[i]); // i is equal to the number of strides performed
-    vslide1down_v8(b[i]);
-  }
-
-  vconfig.vtype.sew = e8;
-  vsetvl(&vconfig);
-  for(int i = 2*FPU_COUNT; i < 3*FPU_COUNT; i++){
-    vfmul_vv_v16_v0_v8();
+inline void test_procedure(double *a, double *b, const int strd_mult){
+  for(int i = SNRT_NFPU_PER_CORE * strd_mult; i < SNRT_NFPU_PER_CORE * (strd_mult + 1); i++){
+    test_op();
     vslide1down_v0(a[i]); // i is equal to the number of strides performed
     vslide1down_v8(b[i]);
   }
 }
 
-int test_procedure(double *a, double *b, double *c, test_t test){
-  switch (test) {
-    case TEST_MUL:
-      return test_mul(a, b);
-    case TEST_ADD:
-      return 0;
-    default:
-      return -1;
-  }
+int test(double *a, double *b){
+  int test_count = 0;
+  vconfig_t vconfig = {
+      .AVL   = -1,
+      .vtype = {.sew = e64, .lmul = m8},
+  };
+
+#ifdef TEST_SEW_64
+  test_setup(a, b, &vconfig);
+  test_procedure(a, b, test_count++);
+#endif
+
+#ifdef TEST_SEW_32
+  vconfig.vtype.sew = e32;
+  vsetvl(&vconfig);
+  test_procedure(a, b, test_count++);
+#endif
+
+#ifdef TEST_SEW_16
+  vconfig.vtype.sew = e16;
+  vsetvl(&vconfig);
+  test_procedure(a, b, test_count++);
+#endif
+
+#ifdef TEST_SEW_8
+  vconfig.vtype.sew = e8;
+  vsetvl(&vconfig);
+  test_procedure(a, b, test_count++);
+#endif
+
+  return 1;
 }

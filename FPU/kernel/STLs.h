@@ -16,22 +16,35 @@
 
 // Author: Gustavo Vilar de Farias, Politecnico di Torino, Italy
 
-#include "riscv_vec_defs.h"
+#include "riscv_vec_defs.c"
 
 #ifndef STLS_H
 #define STLS_H
 
-#define FPU_COUNT 4
-#define STL_NUM_TEST 1
+// Define test targets
+#define TEST_ALL 0
+#define TEST_MUL 1
+#define TEST_ADD 2
 
-typedef enum {
-    TEST_MUL,
-    TEST_ADD
-} test_t;
+// Define test sew
+#if TEST_SEW == 0 // All SEWs
+    #define TEST_SEW_8  1
+    #define TEST_SEW_16 1
+    #define TEST_SEW_32 1
+    #define TEST_SEW_64 1
+#else
+    #define TEST_SEW_8  (TEST_SEW ==  8)
+    #define TEST_SEW_16 (TEST_SEW == 16)
+    #define TEST_SEW_32 (TEST_SEW == 32)
+    #define TEST_SEW_64 (TEST_SEW == 64)
+#endif
 
-void test_setup(double *a, double *b, vconfig_t *vconfig);
-void test_stride(double *a, double *b);
-int test_mul(double *a, double *b);
-int test_procedure(double *a, double *b, double *c, test_t test);
+int test(double *a, double *b);
+
+#if TEST_TARGET == TEST_ALL
+#define test_op() vfmul_vv_v16_v0_v8(); \
+                  vfadd_vv_v16_v0_v8();
+// TODO add the other functions and mode
+#endif
 
 #endif

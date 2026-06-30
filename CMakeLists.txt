@@ -26,9 +26,17 @@ include_directories(include)
 include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
 # Macro to regenerate the golden values and compile a module
-macro(add_spatz_test_STL name file data_type test_type)
-  set(target_name ${name}_M${param1})
+macro(add_spatz_test_STL name file data_type test_target test_sew)
+  set(target_name ${name}_TT${test_target}_TS${test_sew})
   add_snitch_test(${target_name} ${file})
   target_link_libraries(test-${SNITCH_TEST_PREFIX}${target_name} STLs ${SNITCH_RUNTIME})
-  target_compile_definitions(test-${SNITCH_TEST_PREFIX}${target_name} PUBLIC DATAHEADER="data/tp_data_${data_type}.h" SNRT_NFPU_PER_CORE=${SNRT_NFPU_PER_CORE} TEST_TYPE=${test_type})
+  target_compile_definitions(test-${SNITCH_TEST_PREFIX}${target_name} PUBLIC DATAHEADER="data/tp_data_${data_type}.h" SNRT_NFPU_PER_CORE=${SNRT_NFPU_PER_CORE} TEST_TARGET=${test_target} TEST_SEW=${test_sew})
 endmacro()
+
+add_library(STLs STATIC
+  include/riscv_vec_defs.c
+)
+
+enable_testing()
+set(SNITCH_TEST_PREFIX "spatzSTLs-")
+add_spatz_test_STL(FPU FPU/main.c random 0 0) #All tests and All SEWs
