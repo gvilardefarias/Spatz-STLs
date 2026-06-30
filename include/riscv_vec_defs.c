@@ -60,6 +60,9 @@ __attribute__ ((always_inline)) inline void vfmul_vv_v16_v0_v8(){
 __attribute__ ((always_inline)) inline void vfadd_vv_v16_v0_v8(){
 	asm volatile("vfadd.vv v16, v0, v8");
 }
+__attribute__ ((always_inline)) inline void vfsub_vv_v16_v0_v8(){
+	asm volatile("vfsub.vv v16, v0, v8");
+}
 
 __attribute__ ((always_inline)) inline void vslide1down_v0(int value){
 	asm volatile("vslide1down.vx v0, v0, %0" ::"r"(value));

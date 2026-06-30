@@ -43,7 +43,8 @@ int test(double *a, double *b);
 
 #if TEST_TARGET == TEST_ALL
 #define test_op() vfmul_vv_v16_v0_v8(); \
-                  vfadd_vv_v16_v0_v8();
+                  vfadd_vv_v16_v0_v8(); \
+                  vfsub_vv_v16_v0_v8(); 
 // TODO add the other functions and mode
 #endif
 
