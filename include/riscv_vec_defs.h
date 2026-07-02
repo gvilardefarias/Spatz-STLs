@@ -50,5 +50,6 @@ typedef struct {
 int vtype_to_int(vtype_t *vtype);
 
 void vsetvl(vconfig_t *vconfig);
+unsigned int vsetvtype(vtype_t *vtype);
 
 #endif

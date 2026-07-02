@@ -32,11 +32,23 @@
     #define TEST_SEW_16 1
     #define TEST_SEW_32 1
     #define TEST_SEW_64 1
+
+    #define TEST_START_SEW e64
 #else
-    #define TEST_SEW_8  (TEST_SEW ==  8)
-    #define TEST_SEW_16 (TEST_SEW == 16)
-    #define TEST_SEW_32 (TEST_SEW == 32)
     #define TEST_SEW_64 (TEST_SEW == 64)
+    #define TEST_SEW_32 (TEST_SEW == 32)
+    #define TEST_SEW_16 (TEST_SEW == 16)
+    #define TEST_SEW_8  (TEST_SEW ==  8)
+    
+    #if TEST_SEW_64 == 1
+        #define TEST_START_SEW e64
+    #elif TEST_SEW_32 == 1
+        #define TEST_START_SEW e32
+    #elif TEST_SEW_16 == 1
+        #define TEST_START_SEW e16
+    #elif TEST_SEW_8 == 1
+        #define TEST_START_SEW e8
+    #endif
 #endif
 
 int test(double *a, double *b);

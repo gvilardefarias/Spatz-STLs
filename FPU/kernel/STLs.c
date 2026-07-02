@@ -20,9 +20,7 @@
 #include <stddef.h>
 
 
-void test_setup(double *a, double *b, vconfig_t *vconfig){
-  vsetvl(vconfig);
-
+void tp_load(double *a, double *b){
   vle64_v0(a);
   vle64_v8(b);
 }
@@ -30,40 +28,57 @@ void test_setup(double *a, double *b, vconfig_t *vconfig){
 inline void test_procedure(double *a, double *b, const int strd_mult){
   for(int i = SNRT_NFPU_PER_CORE * strd_mult; i < SNRT_NFPU_PER_CORE * (strd_mult + 1); i++){
     test_op();
+
+    #if SNRT_NFPU_PER_CORE > 1
     vslide1down_v0(a[i]); // i is equal to the number of strides performed
     vslide1down_v8(b[i]);
+    #endif
   }
 }
 
 int test(double *a, double *b){
   int test_count = 0;
-  vconfig_t vconfig = {
-      .AVL   = -1,
-      .vtype = {.sew = e64, .lmul = m8},
-  };
+  unsigned int avl;
+  vtype_t vtype = {.sew = TEST_START_SEW, .lmul = m8};
 
-#ifdef TEST_SEW_64
-  test_setup(a, b, &vconfig);
-  test_procedure(a, b, test_count++);
-#endif
+  for(int i = 0; i < TP_MUL; i++){
+    vsetvtype(&vtype);
+    tp_load(a, b); // TODO: load the other part of the array as i advances
 
-#ifdef TEST_SEW_32
-  vconfig.vtype.sew = e32;
-  vsetvl(&vconfig);
-  test_procedure(a, b, test_count++);
-#endif
+    #if TEST_SEW_64 == 1
+      test_procedure(a, b, test_count++);
+    #endif
 
-#ifdef TEST_SEW_16
-  vconfig.vtype.sew = e16;
-  vsetvl(&vconfig);
-  test_procedure(a, b, test_count++);
-#endif
+    #if TEST_SEW_32 == 1
+      #if TEST_SEW_64 == 1
+        vtype.sew = e32;
+        vsetvtype(&vtype);
+      #endif
+      test_procedure(a, b, test_count++);
+    #endif
 
-#ifdef TEST_SEW_8
-  vconfig.vtype.sew = e8;
-  vsetvl(&vconfig);
-  test_procedure(a, b, test_count++);
-#endif
+    #if TEST_SEW_16 == 1
+      #if TEST_SEW_64 + TEST_SEW_32 > 1
+        vtype.sew = e16;
+        vsetvtype(&vtype);
+      #endif
+      test_procedure(a, b, test_count++);
+    #endif
+
+    #if TEST_SEW_8 == 1
+      #if TEST_SEW_64 + TEST_SEW_32 + TEST_SEW_16 > 1
+        vtype.sew = e8;
+        vsetvtype(&vtype);
+      #endif
+      test_procedure(a, b, test_count++);
+    #endif
+
+    #if TP_MUL > 1 && (TEST_SEW_64 + TEST_SEW_32 + TEST_SEW_16 + TEST_SEW_8) > 1
+      vtype.sew = TEST_START_SEW;
+      vsetvtype(&vtype);
+    #endif
+  }
+
 
   return 1;
 }

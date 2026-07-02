@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.13)
 
 # Defines
 set(SNRT_NFPU_PER_CORE "0" CACHE STRING "Number of FPUs per Spatz")
+set(SNRT_VLEN "0" CACHE STRING "VLEN")
 
 # Allow STLs to be built as a standalone library.
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -30,7 +31,7 @@ macro(add_spatz_test_STL name file data_type test_target test_sew)
   set(target_name ${name}_TT${test_target}_TSEW${test_sew})
   add_snitch_test(${target_name} ${file})
   target_link_libraries(test-${SNITCH_TEST_PREFIX}${target_name} STLs ${SNITCH_RUNTIME})
-  target_compile_definitions(test-${SNITCH_TEST_PREFIX}${target_name} PUBLIC DATAHEADER="data/tp_data_${data_type}.h" SNRT_NFPU_PER_CORE=${SNRT_NFPU_PER_CORE} TEST_TARGET=${test_target} TEST_SEW=${test_sew})
+  target_compile_definitions(test-${SNITCH_TEST_PREFIX}${target_name} PUBLIC DATAHEADER="data/tp_data_${data_type}.h" SNRT_NFPU_PER_CORE=${SNRT_NFPU_PER_CORE} SNRT_VLEN=${SNRT_VLEN} TEST_TARGET=${test_target} TEST_SEW=${test_sew})
 endmacro()
 
 add_library(STLs STATIC

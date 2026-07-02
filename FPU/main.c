@@ -40,8 +40,8 @@ int main() {
 
   // Allocate the test patterns
   if (cid == 0) {
-    a = (double *)snrt_l1alloc(VLMAX * SEW / 8);
-    b = (double *)snrt_l1alloc(VLMAX * SEW / 8);
+    a = (double *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
+    b = (double *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
   }
 
   // Reset timer
@@ -51,9 +51,10 @@ int main() {
   snrt_cluster_hw_barrier();
 
   // Initialize matrices
+  // TODO: load only partially the patterns and load more as the test advances
   if (cid == 0) {
-    snrt_dma_start_1d(a, &tp[0], VLMAX * SEW / 8);
-    snrt_dma_start_1d(b, &tp[1], VLMAX * SEW / 8);
+    snrt_dma_start_1d(a, &tp[0], TP_MUL * SNRT_VLEN * LMUL / 8);
+    snrt_dma_start_1d(b, &tp[1], TP_MUL * SNRT_VLEN * LMUL / 8);
     snrt_dma_wait_all();
   }
 

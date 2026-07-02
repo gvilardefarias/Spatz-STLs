@@ -8,6 +8,7 @@
 {
     tp_type: 'random',
     LMUL:8,
-    SEW:64,
-    VLEN:512
+//    SEW:64,
+    VLEN:512,
+    TP_MUL: 1
 }

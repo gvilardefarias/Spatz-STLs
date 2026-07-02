@@ -12,7 +12,7 @@ import argparse
 
 np.random.seed(21)
 
-def mat2str(mat, mat_name):
+def mat2str(mat, mat_name, SEW):
     n_row = len(mat)
     try:
         n_col = len(mat[0])
@@ -20,9 +20,9 @@ def mat2str(mat, mat_name):
         n_col = 1
 
     if n_col > 1:
-        mat_str = f"unsigned int {mat_name}[{n_row}][{n_col}] = {{"
+        mat_str = f"uint{SEW}_t {mat_name}[{n_row}][{n_col}] = {{"
     else:
-        mat_str = f"unsigned int {mat_name}[{n_row}] = {{"
+        mat_str = f"uint{SEW}_t {mat_name}[{n_row}] = {{"
 
     for i in range(n_row):
         for j in range(n_col):
@@ -42,14 +42,24 @@ def gen_tp(config_tp):
     tp_type = config_tp["tp_type"]
     SEW = config_tp["SEW"]
     VLMAX = config_tp["VLMAX"]
+    TP_MUL = config_tp.get("TP_MUL", 1)
 
     tp = []
 
-    if SEW != 32:
-        VLMAX = int(VLMAX * (SEW / 32))
-
     if tp_type == "random":
-        tp = np.random.randint(0, 2**32, size=(2, VLMAX), dtype=np.uint32)
+        # choose numpy unsigned int dtype according to SEW
+        if SEW == 8:
+            dtype = np.uint8
+        elif SEW == 16:
+            dtype = np.uint16
+        elif SEW == 32:
+            dtype = np.uint32
+        elif SEW == 64:
+            dtype = np.uint64
+        else:
+            raise ValueError(f"Unsupported SEW: {SEW}")
+
+        tp = np.random.randint(0, 2**SEW, size=(2, VLMAX * TP_MUL), dtype=dtype)
     else:
         raise ValueError(f"Unknown tp_type: {tp_type}")
 
@@ -58,9 +68,14 @@ def gen_tp(config_tp):
 def gen_defines(config_tp):
     VLMAX = config_tp["VLMAX"]
     SEW = config_tp["SEW"]
+    LMUL = config_tp["LMUL"]
+    TP_MUL = config_tp.get("TP_MUL", 1)
 
-    defines_str = f"#define VLMAX {VLMAX}\n"
-    defines_str += f"#define SEW {SEW}\n"
+    defines_str = "#include <stdint.h>\n\n"
+#    defines_str += f"#define VLMAX {VLMAX}\n"
+#    defines_str += f"#define SEW {SEW}\n"
+    defines_str += f"#define LMUL {LMUL}\n"
+    defines_str += f"#define TP_MUL {TP_MUL}\n"
 
     return defines_str
 
@@ -74,11 +89,13 @@ def main():
 
     with open(args.config_file, 'r') as f:
         config_tp = hjson.loads(f.read())
+    
+    config_tp["SEW"] = int(32)
 
     config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])
 
     tp = gen_tp(config_tp)
-    tp_str = mat2str(tp, "tp")
+    tp_str = mat2str(tp, "tp", config_tp["SEW"])
 
     output_file = file_path / f"tp_data_{config_tp['tp_type']}.h"
     with open(output_file, 'w') as f:

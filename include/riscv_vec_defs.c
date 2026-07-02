@@ -40,6 +40,14 @@ void vsetvl(vconfig_t *vconfig){
     vconfig->AVL = vl;
 }
 
+unsigned int vsetvtype(vtype_t *vtype){
+    unsigned int vl;
+    asm volatile("vsetvl %[vl], x0, %[vtype]"
+                 : [vl]    "=r"(vl)
+                 : [vtype] "r"(vtype_to_int(vtype)));
+    return vl;
+}
+
 
 __attribute__ ((always_inline)) inline void vle64_v0(void *addr){
 	asm volatile("vle64.v v0, (%0)" ::"r"(addr));
