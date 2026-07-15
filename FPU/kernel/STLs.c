@@ -107,7 +107,7 @@ int test(uint32_t *a, uint32_t *b){
     #endif
 
     #if TEST_SEW_16 == 1
-      #if TEST_SEW_64 + TEST_SEW_32 > 1
+      #if TEST_SEW_64 + TEST_SEW_32 > 0
         vtype.sew = e16;
         vsetvtype(&vtype);
       #endif
@@ -115,7 +115,7 @@ int test(uint32_t *a, uint32_t *b){
     #endif
 
     #if TEST_SEW_8 == 1
-      #if TEST_SEW_64 + TEST_SEW_32 + TEST_SEW_16 > 1
+      #if TEST_SEW_64 + TEST_SEW_32 + TEST_SEW_16 > 0
         vtype.sew = e8;
         vsetvtype(&vtype);
       #endif
