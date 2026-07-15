@@ -28,7 +28,7 @@ include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
 # Macro to regenerate the golden values and compile a module
 macro(add_spatz_test_STL name file data_type test_target test_sew)
-  set(target_name ${name}_TT${test_target}_TSEW${test_sew})
+  set(target_name ${name}_TP${data_type}_TT${test_target}_TSEW${test_sew})
   add_snitch_test(${target_name} ${file})
   target_link_libraries(test-${SNITCH_TEST_PREFIX}${target_name} STLs ${SNITCH_RUNTIME})
   target_compile_definitions(test-${SNITCH_TEST_PREFIX}${target_name} PUBLIC DATAHEADER="data/tp_data_${data_type}.h" SNRT_NFPU_PER_CORE=${SNRT_NFPU_PER_CORE} SNRT_VLEN=${SNRT_VLEN} TEST_TARGET=${test_target} TEST_SEW=${test_sew})
@@ -41,4 +41,11 @@ add_library(STLs STATIC
 enable_testing()
 set(SNITCH_TEST_PREFIX "spatzSTLs-")
 add_spatz_test_STL(FPU FPU/main.c random 0 0) #All tests and All SEWs
+add_spatz_test_STL(FPU FPU/main.c random 0 8)  #All tests and  8 SEW
+add_spatz_test_STL(FPU FPU/main.c random 0 16) #All tests and 16 SEW
+add_spatz_test_STL(FPU FPU/main.c random 0 32) #All tests and 32 SEW
 add_spatz_test_STL(FPU FPU/main.c random 0 64) #All tests and 64 SEW
+add_spatz_test_STL(FPU FPU/main.c random 0 72) #All tests and 64 + 8 SEW
+
+add_spatz_test_STL(FPU FPU/main.c incremental 0 0) #All tests and All SEWs
+add_spatz_test_STL(FPU FPU/main.c incremental 0 64) #All tests and 64 SEW

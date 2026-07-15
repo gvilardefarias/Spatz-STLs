@@ -6,9 +6,9 @@
 
 //    VLMAX: 128 for 32b and 64 for 64b
 {
-    tp_type: 'random',
+    tp_type: 'incremental',
     LMUL:8,
 //    SEW:64,
     VLEN:512,
-    TP_MUL: 8
+    TP_MUL: 4
 }

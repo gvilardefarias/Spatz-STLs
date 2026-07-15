@@ -23,8 +23,8 @@
 #include DATAHEADER
 #include "kernel/STLs.c"
 
-double *a;
-double *b;
+uint32_t *a;
+uint32_t *b;
 
 size_t benchmark_get_cycle() { return read_csr(mcycle); }
 
@@ -40,8 +40,8 @@ int main() {
 
   // Allocate the test patterns
   if (cid == 0) {
-    a = (double *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
-    b = (double *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
+    a = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
+    b = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
   }
 
   // Reset timer

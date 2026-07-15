@@ -20,18 +20,28 @@
 #ifndef RISCV_VEC_DEFS_H
 #define RISCV_VEC_DEFS_H
 
+#define E8  0
+#define E16 1
+#define E32 2
+#define E64 3
+
+#define M1 0
+#define M2 1
+#define M4 2
+#define M8 3
+
 typedef enum {
-    e8  = 0,
-    e16 = 1,
-    e32 = 2,
-    e64 = 3
+    e8  = E8,
+    e16 = E16,
+    e32 = E32,
+    e64 = E64
 } sew_t;
 
 typedef enum {
-    m1  = 0,
-    m2  = 1,
-    m4  = 2,
-    m8  = 3, // registers available: v0, v8, v16, and v24
+    m1  = M1,
+    m2  = M2,
+    m4  = M4,
+    m8  = M8, // registers available: v0, v8, v16, and v24
     mf2 = 5,
     mf4 = 6,
     mf8 = 7
@@ -47,9 +57,9 @@ typedef struct {
     vtype_t vtype;
 } vconfig_t;
 
-int vtype_to_int(vtype_t *vtype);
+inline int vtype_to_int(vtype_t *vtype);
 
-void vsetvl(vconfig_t *vconfig);
-unsigned int vsetvtype(vtype_t *vtype);
+inline void vsetvl(vconfig_t *vconfig);
+inline unsigned int vsetvtype(vtype_t *vtype);
 
 #endif

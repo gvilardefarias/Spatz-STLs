@@ -21,6 +21,8 @@
 #ifndef STLS_H
 #define STLS_H
 
+#define VLMAX_32 (SNRT_VLEN / 32) * LMUL
+
 // Define test targets
 #define TEST_ALL 0
 #define TEST_MUL 1
@@ -33,25 +35,35 @@
     #define TEST_SEW_32 1
     #define TEST_SEW_64 1
 
-    #define TEST_START_SEW e64
+    #define TEST_START_SEW E64
+#elif TEST_SEW == 72
+    #define TEST_SEW_8  1
+    #define TEST_SEW_16 0
+    #define TEST_SEW_32 0
+    #define TEST_SEW_64 1
+
+    #define TEST_START_SEW E64
 #else
     #define TEST_SEW_64 (TEST_SEW == 64)
     #define TEST_SEW_32 (TEST_SEW == 32)
     #define TEST_SEW_16 (TEST_SEW == 16)
     #define TEST_SEW_8  (TEST_SEW ==  8)
     
+    #if TEST_SEW_8 == 1
+        #define TEST_START_SEW E8
+    #endif
+    #if TEST_SEW_16 == 1
+        #define TEST_START_SEW E16
+    #endif
+    #if TEST_SEW_32 == 1
+        #define TEST_START_SEW E32
+    #endif
     #if TEST_SEW_64 == 1
-        #define TEST_START_SEW e64
-    #elif TEST_SEW_32 == 1
-        #define TEST_START_SEW e32
-    #elif TEST_SEW_16 == 1
-        #define TEST_START_SEW e16
-    #elif TEST_SEW_8 == 1
-        #define TEST_START_SEW e8
+        #define TEST_START_SEW E64
     #endif
 #endif
 
-int test(double *a, double *b);
+int test(uint32_t *a, uint32_t *b);
 
 #if TEST_TARGET == TEST_ALL
 #define test_op() vfmul_vv_v16_v0_v8(); \

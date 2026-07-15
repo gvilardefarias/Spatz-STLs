@@ -60,6 +60,8 @@ def gen_tp(config_tp):
             raise ValueError(f"Unsupported SEW: {SEW}")
 
         tp = np.random.randint(0, 2**SEW, size=(2, VLMAX * TP_MUL), dtype=dtype)
+    elif tp_type == "incremental":
+        tp = np.array(range(0, 2 * VLMAX * TP_MUL), dtype=np.uint32).reshape(2, VLMAX * TP_MUL)
     else:
         raise ValueError(f"Unknown tp_type: {tp_type}")
 
