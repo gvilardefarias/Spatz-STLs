@@ -117,6 +117,25 @@ __attribute__ ((always_inline)) inline void vfmacc_vv_v16_v0_v8(){
 __attribute__ ((always_inline)) inline void vfmsac_vv_v16_v0_v8(){
 	asm volatile("vfmsac.vv v16, v0, v8");
 }
+__attribute__ ((always_inline)) inline void vor_vx_v8(uint64_t r){
+	asm volatile("vor.vx v8, v8, %0" :: "r"(r));
+}
+__attribute__ ((always_inline)) inline void vor_vx_v0(uint64_t r){
+	asm volatile("vor.vx v0, v0, %0" :: "r"(r));
+}
+__attribute__ ((always_inline)) inline void vand_vx_v8(uint64_t r){
+	asm volatile("vand.vx v8, v8, %0" :: "r"(r));
+}
+
+__attribute__ ((always_inline)) inline void vfsub_vf_v16_v8(double d){
+	asm volatile("vfsub.vf v16, v8, %0" ::"f"(d));
+}
+__attribute__ ((always_inline)) inline void vfadd_vf_v16_v8(double d){
+	asm volatile("vfadd.vf v16, v8, %0" ::"f"(d));
+}
+__attribute__ ((always_inline)) inline void vfmul_vf_v16_v8(double d){
+	asm volatile("vfmul.vf v16, v8, %0" ::"f"(d));
+}
 
 __attribute__ ((always_inline)) inline void vslide1down_v0(uint64_t value){
 	asm volatile("vslide1down.vx v0, v0, %0" ::"r"(value));
