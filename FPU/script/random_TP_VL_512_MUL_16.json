@@ -6,8 +6,9 @@
 
 //    VLMAX: 128 for 32b and 64 for 64b
 {
-    tp_type: 'gizo',
+    tp_type: 'random',
     LMUL:8,
 //    SEW:64,
-    VLEN:512
+    VLEN:512,
+    TP_MUL: 16
 }

@@ -17,16 +17,23 @@
 // Author: Gustavo Vilar de Farias, Politecnico di Torino, Italy
 
 #include "riscv_vec_defs.c"
+#include <stdint.h>
 
 #ifndef STLS_H
 #define STLS_H
+
+typedef union {
+    double d;
+    uint64_t i;
+} DoubleInt;
 
 #define VLMAX_32 (SNRT_VLEN / 32) * LMUL
 
 // Define test targets
 #define TEST_ALL 0
-#define TEST_MUL 1
-#define TEST_ADD 2
+#define TEST_MIX 1
+#define TEST_GIZO 2
+//#define TEST_ADD 2
 
 // Define test sew
 #if TEST_SEW == 0 // All SEWs
@@ -63,13 +70,24 @@
     #endif
 #endif
 
-int test(uint32_t *a, uint32_t *b);
+int test_mix(uint32_t *a, uint32_t *b);
+int test_gizo(uint64_t cst_0, uint64_t cst_1, uint64_t* tp_0, uint64_t* tp_1, uint64_t* tp_2, uint64_t* tp_3); // Gizoupolos paper
 
-#if TEST_TARGET == TEST_ALL
-#define test_op() vfmul_vv_v16_v0_v8(); \
-                  vfadd_vv_v16_v0_v8(); \
-                  vfsub_vv_v16_v0_v8(); 
-// TODO add the other functions and mode
+#if TEST_TARGET == TEST_ALL || TEST_TARGET == TEST_MIX
+    #define test_op() vfmul_vv_v16_v0_v8(); \
+                      vfadd_vv_v16_v0_v8(); \
+                      vfsub_vv_v16_v0_v8(); 
+    // TODO add the other functions and mode
+    #define test_op_f_v8(d) vfsub_vf_v16_v8(d); \
+                            vfadd_vf_v16_v8(d); \
+                            vfmul_vf_v16_v8(d); // TODO increase it
+#elif TEST_TARGET == TEST_GIZO
+    #define test_op() vfmul_vv_v16_v0_v8(); \
+                      vfadd_vv_v16_v0_v8(); \
+                      vfsub_vv_v16_v0_v8(); 
+    #define test_op_f_v8(d) vfsub_vf_v16_v8(d); \
+                            vfadd_vf_v16_v8(d); \
+                            vfmul_vf_v16_v8(d);
 #endif
 
 #endif

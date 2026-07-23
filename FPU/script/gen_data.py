@@ -13,7 +13,11 @@ import argparse
 np.random.seed(21)
 
 def mat2str(mat, mat_name, SEW):
-    n_row = len(mat)
+    try:
+        n_row = len(mat)
+    except:
+        return f"uint{SEW}_t {mat_name} = {mat};\n"
+
     try:
         n_col = len(mat[0])
     except:
@@ -60,12 +64,40 @@ def gen_tp(config_tp):
             raise ValueError(f"Unsupported SEW: {SEW}")
 
         tp = np.random.randint(0, 2**SEW, size=(2, VLMAX * TP_MUL), dtype=dtype)
+
+        return tp
+#    elif  TODO: calculate coverage to garantee that each bit is at least 1 or 0 in the inputs and outpus at least once
     elif tp_type == "incremental":
         tp = np.array(range(0, 2 * VLMAX * TP_MUL), dtype=np.uint32).reshape(2, VLMAX * TP_MUL)
+
+        return tp
+    elif tp_type == "gizo":
+        if SEW == 64:
+            mantissa = 52
+        elif SEW == 32:
+            mantissa = 23
+        elif SEW == 16:
+            mantissa = 10
+        elif SEW == 8:
+            mantissa = 4
+
+        cst_0 = 0 #00...00
+        cst_1 = int("1"*mantissa, 2)       #11...11
+        tp_0 = [int("1" + "0"*(mantissa-1), 2)]  #10...00 -> logic shift
+        tp_1 = [int("01" + "0"*(mantissa-2), 2)] #01...00 -> logic shift
+        tp_2 = [0] #00...00 -> arit shift with sign 1
+        tp_3 = [int("0" + "1"*(mantissa-1), 2)] #01...11 -> logic shift
+
+        for i in range(mantissa):
+            tp_0.append(tp_0[-1] >> 1)
+            tp_1.append(tp_1[-1] >> 1)
+            tp_2.append(int("1"*(i+1) + "0"*(mantissa-(i+1)), 2))
+            tp_3.append(tp_3[-1] >> 1)
+        
+        return ((cst_0, cst_1, tp_0, tp_1, tp_2, tp_3), ["cst_0", "cst_1", "tp_0", "tp_1", "tp_2", "tp_3"])
     else:
         raise ValueError(f"Unknown tp_type: {tp_type}")
 
-    return tp
 
 def gen_defines(config_tp):
     VLMAX = config_tp["VLMAX"]
@@ -76,8 +108,9 @@ def gen_defines(config_tp):
     defines_str = "#include <stdint.h>\n\n"
 #    defines_str += f"#define VLMAX {VLMAX}\n"
 #    defines_str += f"#define SEW {SEW}\n"
-    defines_str += f"#define LMUL {LMUL}\n"
-    defines_str += f"#define TP_MUL {TP_MUL}\n"
+    if config_tp["tp_type"] != "gizo":
+        defines_str += f"#define LMUL {LMUL}\n"
+        defines_str += f"#define TP_MUL {TP_MUL}\n"
 
     return defines_str
 
@@ -92,12 +125,21 @@ def main():
     with open(args.config_file, 'r') as f:
         config_tp = hjson.loads(f.read())
     
-    config_tp["SEW"] = int(32)
 
-    config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])
+    tp_str = ""
+    if config_tp["tp_type"] == "gizo":
+        config_tp["SEW"] = int(64)
+        config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])
 
-    tp = gen_tp(config_tp)
-    tp_str = mat2str(tp, "tp", config_tp["SEW"])
+        tp_arr, tp_names = gen_tp(config_tp)
+        for i in range(len(tp_arr)):
+            tp_str += mat2str(tp_arr[i], tp_names[i], config_tp["SEW"])
+    else:
+        config_tp["SEW"] = int(32)
+        config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])
+
+        tp = gen_tp(config_tp)
+        tp_str = mat2str(tp, "tp", config_tp["SEW"])
 
     output_file = file_path / f"tp_data_{config_tp['tp_type']}.h"
     with open(output_file, 'w') as f:

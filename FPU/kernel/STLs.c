@@ -17,8 +17,6 @@
 // Author: Gustavo Vilar de Farias, Politecnico di Torino, Italy
 
 #include "STLs.h"
-#include <stdint.h>
-
 
 inline void tp_load(uint32_t *a, uint32_t *b){
   #if TEST_START_SEW == E64
@@ -36,48 +34,85 @@ inline void tp_load(uint32_t *a, uint32_t *b){
   #endif
 }
 
-// TODO change to inline after debug
 inline void test_procedure(uint8_t *a, uint8_t *b, const unsigned int SEW){
-//  PRINTF("Starting test procedure for SEW = %d\n", SEW);
   #if SNRT_NFPU_PER_CORE > 1
     const unsigned int strd_mult = SEW / 8; // Number of bytes per element
   #endif
-      /*
-  const unsigned int cid = snrt_cluster_core_idx();
-  uint32_t *a_dbg;
-  uint32_t *b_dbg;
-  if (cid == 0) {
-    a_dbg = (uint32_t *)snrt_l1alloc(SNRT_VLEN * LMUL / 8);
-    b_dbg = (uint32_t *)snrt_l1alloc(SNRT_VLEN * LMUL / 8);
-  }
-    */
 
-//  PRINTF("strd_mult = %d\n", strd_mult);
   test_op();
-  for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-//    PRINTF("test 0\n");
-    #if SNRT_NFPU_PER_CORE > 1
+  #if SNRT_NFPU_PER_CORE > 1
+    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
       vslide1down_v0(*a); // i is equal to the number of strides performed
       vslide1down_v8(*b);
-      /*
-      if(SEW == 64 && snrt_cluster_core_idx() == 0){
-        vse64_v0(a_dbg);
-        vse64_v8(b_dbg);
-        for(int j = 0; j < 4; j++){
-          PRINTF("a_dbg[%d] = %d | ", j, *((uint64_t*)a_dbg + j));
-        }
-      PRINTF("\n");
-      }
-      */
+
       a += strd_mult;
       b += strd_mult;
-    #endif
 
-    test_op();
-  }
+      test_op();
+    }
+  #endif
 }
 
-int test(uint32_t *a, uint32_t *b){
+inline void safe_test_procedure(uint8_t* a, uint8_t* b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end, const unsigned int SEW){
+  #if SNRT_NFPU_PER_CORE > 1
+    const unsigned int strd_mult = SEW / 8; // Number of bytes per element
+  #endif
+
+  test_op();
+  #if SNRT_NFPU_PER_CORE > 1
+    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
+      vslide1down_v0(*a); // i is equal to the number of strides performed
+      vslide1down_v8(*b);
+
+      a += strd_mult;
+      b += strd_mult;
+
+      if(a >= a_end) a = a_start;
+      if(b >= b_end) b = b_start;
+
+      test_op();
+    }
+  #endif
+}
+
+inline void safe_test_procedure_f_v8(uint8_t* b, uint8_t* b_start, uint8_t* b_end, double d, const unsigned int sew){
+  #if SNRT_NFPU_PER_CORE > 1
+    const unsigned int strd_mult = sew / 8; // number of bytes per element
+  #endif
+
+  test_op();
+  #if SNRT_NFPU_PER_CORE > 1
+    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
+      vslide1down_v8(*b);
+
+      b += strd_mult;
+
+      if(b >= b_end) b = b_start;
+
+      test_op_f_v8(d);
+    }
+  #endif
+}
+
+inline void test_procedure_f_v8(uint8_t* b, double d, const unsigned int sew){
+  #if SNRT_NFPU_PER_CORE > 1
+    const unsigned int strd_mult = sew / 8; // number of bytes per element
+  #endif
+
+  test_op();
+  #if SNRT_NFPU_PER_CORE > 1
+    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
+      vslide1down_v8(*b);
+
+      b += strd_mult;
+
+      test_op_f_v8(d);
+    }
+  #endif
+}
+
+#if TEST_TARGET == TEST_MIX || TEST_TARGET == TEST_ALL
+int test_mix(uint32_t *a, uint32_t *b){
   int test_count;
   unsigned int avl;
   uint8_t *a_strd = (uint8_t *)a; //  TODO: change to declare it only if NFPU > 1
@@ -85,13 +120,9 @@ int test(uint32_t *a, uint32_t *b){
 
   vtype_t vtype = {.sew = TEST_START_SEW, .lmul = M8};
   vsetvtype(&vtype);
-//  PRINTF("vtype.sew = %d | vtype.lmul = %d\n", vtype.sew, vtype.lmul);
 
   for(int i = 0; i < TP_MUL; i++){
-//    PRINTF("Test %d/%d\n", i + 1, TP_MUL);
     tp_load(a, b);
-//    PRINTF("data loaded, sew: %d, sew8: %d, sew16: %d, sew32: %d, sew64:%d\n", TEST_START_SEW, e8, e16, e32, e64);
-//    PRINTF("%d %d %d %d\n", TEST_START_SEW == e8, TEST_START_SEW == e16, TEST_START_SEW == e32, TEST_START_SEW == e64);
     test_count = 0;
 
     #if TEST_SEW_64 == 1
@@ -137,3 +168,91 @@ int test(uint32_t *a, uint32_t *b){
 
   return 1;
 }
+#endif
+
+#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
+int test_gizo(uint64_t cst_0, uint64_t cst_1, uint64_t* tp_0, uint64_t* tp_1, uint64_t* tp_2, uint64_t* tp_3){
+  DoubleInt di_cst_0, di_cst_1;
+  const uint64_t exp_0 = (uint64_t) 0x7F << 52;
+  const uint64_t mask_exp_b0_l = ~((uint64_t) 1 << 52);
+  const uint64_t mask_exp_b0_h =  ((uint64_t) 1 << 52);
+
+  cst_0 |= exp_0;
+  cst_1 |= exp_0;
+
+  di_cst_0.i = cst_0;
+  di_cst_1.i = cst_1;
+
+  vconfig_t vconfig = {.AVL = 53,
+                       .vtype = {.sew = E64, .lmul = 8}};
+
+  uint8_t *a_end = (uint8_t*) (tp_0 + 53);
+  uint8_t *b_end = (uint8_t*) (tp_1 + 53);
+  uint8_t *a_start = (uint8_t*) tp_0;
+  uint8_t *b_start = (uint8_t*) tp_1;
+
+  vsetvl(&vconfig);
+
+  vle64_v0(tp_0);
+  vle64_v8(tp_1);
+  vor_vx_v0(exp_0);
+  vor_vx_v8(exp_0);
+
+  uint8_t *a_strd = (uint8_t*) tp_0;
+  uint8_t *b_strd = (uint8_t*) tp_1;
+  // Close-path s1 test
+  for(int i = 0;i < 53;i++){
+    safe_test_procedure(a_strd, b_strd, a_start, b_start, a_end, b_end, 64);
+    vslide1down_v8(*b_strd);
+    b_strd += 8;
+    if(b_strd >= b_end) b_strd = b_start;
+  }
+  // Far-path s1 test
+  vand_vx_v8(mask_exp_b0_l);
+  for(int i = 0;i < 53;i++){
+    safe_test_procedure(a_strd, b_strd, a_start, b_start, a_end, b_end, 64);
+    vslide1down_v8(*b_strd);
+    b_strd += 8;
+    if(b_strd >= b_end) b_strd = b_start;
+  }
+  vor_vx_v8(mask_exp_b0_h);
+
+  // Close-path s2 test
+  safe_test_procedure_f_v8(b_strd, b_start, b_end, di_cst_0.d, 64);
+  // Far-path s2 test
+  di_cst_0.i &= mask_exp_b0_l;
+  safe_test_procedure_f_v8(b_strd, b_start, b_end, di_cst_0.d, 64);
+
+  // Close-path s4 test
+  vle64_v8(tp_3);
+  vor_vx_v8(exp_0);
+  b_end = (uint8_t*) (tp_3 + 53);
+  b_start = (uint8_t*) tp_3;
+  b_strd = (uint8_t*) tp_3;
+  for(int i = 0;i < 53;i++){
+    safe_test_procedure(a_strd, b_strd, a_start, b_start, a_end, b_end, 64);
+    vslide1down_v8(*b_strd);
+    b_strd += 8;
+    if(b_strd >= b_end) b_strd = b_start;
+  }
+  // Far-path s4 test
+  vand_vx_v8(mask_exp_b0_l);
+  for(int i = 0;i < 53;i++){
+    safe_test_procedure(a_strd, b_strd, a_start, b_start, a_end, b_end, 64);
+    vslide1down_v8(*b_strd);
+    b_strd += 8;
+    if(b_strd >= b_end) b_strd = b_start;
+  }
+
+  // Close-path s3 test
+  vle64_v8(tp_2);
+  vor_vx_v8(exp_0);
+  b_strd = (uint8_t*) tp_2;
+  test_procedure_f_v8(b_strd, di_cst_1.d, 64);
+  // Far-path s3 test
+  di_cst_1.i &= mask_exp_b0_l;
+  test_procedure_f_v8(b_strd, di_cst_1.d, 64);
+
+  return 1;
+}
+#endif

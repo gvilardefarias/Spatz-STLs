@@ -23,8 +23,16 @@
 #include DATAHEADER
 #include "kernel/STLs.c"
 
-uint32_t *a;
-uint32_t *b;
+#if TEST_TARGET == TEST_MIX || TEST_TARGET == TEST_ALL
+uint32_t *e;
+uint32_t *f;
+#endif
+#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
+uint64_t *a;
+uint64_t *b;
+uint64_t *c;
+uint64_t *d;
+#endif
 
 size_t benchmark_get_cycle() { return read_csr(mcycle); }
 
@@ -40,8 +48,16 @@ int main() {
 
   // Allocate the test patterns
   if (cid == 0) {
-    a = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
-    b = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
+#if TEST_TARGET == TEST_MIX || TEST_TARGET == TEST_ALL
+    e = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
+    f = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
+#endif
+#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
+    a = (uint64_t *)snrt_l1alloc(53 * 8); // Byte size
+    b = (uint64_t *)snrt_l1alloc(53 * 8);
+    c = (uint64_t *)snrt_l1alloc(53 * 8);
+    d = (uint64_t *)snrt_l1alloc(53 * 8);
+#endif
   }
 
   // Reset timer
@@ -53,8 +69,16 @@ int main() {
   // Initialize matrices
   // TODO: load only partially the patterns and load more as the test advances
   if (cid == 0) {
-    snrt_dma_start_1d(a, &tp[0], TP_MUL * SNRT_VLEN * LMUL / 8);
-    snrt_dma_start_1d(b, &tp[1], TP_MUL * SNRT_VLEN * LMUL / 8);
+#if TEST_TARGET == TEST_MIX || TEST_TARGET == TEST_ALL
+    snrt_dma_start_1d(e, &tp[0], TP_MUL * SNRT_VLEN * LMUL / 8);
+    snrt_dma_start_1d(f, &tp[1], TP_MUL * SNRT_VLEN * LMUL / 8);
+#endif
+#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
+    snrt_dma_start_1d(a, tp_0, 53 * 8);
+    snrt_dma_start_1d(b, tp_1, 53 * 8);
+    snrt_dma_start_1d(c, tp_2, 53 * 8);
+    snrt_dma_start_1d(d, tp_3, 53 * 8);
+#endif
     snrt_dma_wait_all();
   }
 
@@ -66,7 +90,12 @@ int main() {
     // Start timer
     timer_start = benchmark_get_cycle();
 
-    test(a, b);
+#if TEST_TARGET == TEST_MIX || TEST_TARGET == TEST_ALL
+    test_mix(e, f);
+#endif
+#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
+    test_gizo(cst_0, cst_1, a, b, c, d);
+#endif
 
     // Wait for all cores to finish
     snrt_cluster_hw_barrier();
