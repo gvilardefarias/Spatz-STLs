@@ -145,6 +145,11 @@ int test_mix(uint32_t *a, uint32_t *b){
       b_strd = (uint8_t *)b;
 
       vtype.lmul = M8;
+
+      #if TEST_START_SEW == E64
+        vtype.sew = e64;
+      #endif
+
       vsetvtype(&vtype);
     #endif
   }
