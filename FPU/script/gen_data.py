@@ -9,6 +9,7 @@ import pathlib
 import hjson
 import numpy as np
 import argparse
+import op_coverage
 
 np.random.seed(21)
 
@@ -44,8 +45,8 @@ def mat2str(mat, mat_name, SEW):
 
 def gen_tp(config_tp):
     tp_type = config_tp["tp_type"]
-    SEW = config_tp["SEW"]
-    VLMAX = config_tp["VLMAX"]
+    SEW = config_tp.get("SEW")
+    VLMAX = config_tp.get("VLMAX")
     TP_MUL = config_tp.get("TP_MUL", 1)
 
     tp = []
@@ -65,7 +66,17 @@ def gen_tp(config_tp):
 
         tp = np.random.randint(0, 2**SEW, size=(2, VLMAX * TP_MUL), dtype=dtype)
 
+        coverage_calculator = op_coverage.OpCoverage()
+        coverage = coverage_calculator.compute_float_coverage(tp[0], tp[1])
+
+        print(f"Coverage: {coverage} bits covered")
+#        print(coverage_calculator.coverage)
+
         return tp
+    elif tp_type == "random_cov":
+        dtype = np.uint32
+
+
 #    elif  TODO: calculate coverage to garantee that each bit is at least 1 or 0 in the inputs and outpus at least once
     elif tp_type == "incremental":
         tp = np.array(range(0, 2 * VLMAX * TP_MUL), dtype=np.uint32).reshape(2, VLMAX * TP_MUL)
@@ -81,8 +92,13 @@ def gen_tp(config_tp):
         elif SEW == 8:
             mantissa = 4
 
-        cst_0 = 0 #00...00
-        cst_1 = int("1"*mantissa, 2)       #11...11
+        if SEW != 8:
+            cst_0 = 0 #00...00
+            cst_1 = int("1"*mantissa, 2)       #11...11
+        else:
+            cst_0 = [0] * (mantissa + 1)
+            cst_1 = [int("1"*mantissa, 2)] * (mantissa + 1)
+
         tp_0 = [int("1" + "0"*(mantissa-1), 2)]  #10...00 -> logic shift
         tp_1 = [int("01" + "0"*(mantissa-2), 2)] #01...00 -> logic shift
         tp_2 = [0] #00...00 -> arit shift with sign 1
@@ -94,7 +110,7 @@ def gen_tp(config_tp):
             tp_2.append(int("1"*(i+1) + "0"*(mantissa-(i+1)), 2))
             tp_3.append(tp_3[-1] >> 1)
         
-        return ((cst_0, cst_1, tp_0, tp_1, tp_2, tp_3), ["cst_0", "cst_1", "tp_0", "tp_1", "tp_2", "tp_3"])
+        return ((cst_0, cst_1, tp_0, tp_1, tp_2, tp_3), [f"cst_0_s{SEW}", f"cst_1_s{SEW}", f"tp_0_s{SEW}", f"tp_1_s{SEW}", f"tp_2_s{SEW}", f"tp_3_s{SEW}"])
     else:
         raise ValueError(f"Unknown tp_type: {tp_type}")
 
@@ -128,12 +144,13 @@ def main():
 
     tp_str = ""
     if config_tp["tp_type"] == "gizo":
-        config_tp["SEW"] = int(64)
-        config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])
+        for sew in [64, 32, 16, 8]:
+            config_tp["SEW"] = sew
+            config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])
 
-        tp_arr, tp_names = gen_tp(config_tp)
-        for i in range(len(tp_arr)):
-            tp_str += mat2str(tp_arr[i], tp_names[i], config_tp["SEW"])
+            tp_arr, tp_names = gen_tp(config_tp)
+            for i in range(len(tp_arr)):
+                tp_str += mat2str(tp_arr[i], tp_names[i], sew)
     else:
         config_tp["SEW"] = int(32)
         config_tp["VLMAX"] = int((config_tp["VLEN"] / config_tp["SEW"]) * config_tp["LMUL"])

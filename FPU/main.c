@@ -23,15 +23,42 @@
 #include DATAHEADER
 #include "kernel/STLs.c"
 
+#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
+#include "kernel/test_gizo.c"
+
+#if TEST_SEW_64 == 1
+  uint64_t *a_64;
+  uint64_t *b_64;
+  uint64_t *c_64;
+  uint64_t *d_64;
+#endif
+#if TEST_SEW_32 == 1
+  uint32_t *a_32;
+  uint32_t *b_32;
+  uint32_t *c_32;
+  uint32_t *d_32;
+#endif
+#if TEST_SEW_16 == 1
+  uint16_t *a_16;
+  uint16_t *b_16;
+  uint16_t *c_16;
+  uint16_t *d_16;
+#endif
+// TODO: fix gizo with SEW8
+//#if TEST_SEW_8 == 1
+//  uint8_t *a_8;
+//  uint8_t *b_8;
+//  uint8_t *c_8;
+//  uint8_t *d_8;
+//  uint8_t *cst_0_8;
+//  uint8_t *cst_1_8;
+//#endif
+#endif
 #if TEST_TARGET == TEST_MIX || TEST_TARGET == TEST_ALL
+#include "kernel/test_mix.c"
+
 uint32_t *e;
 uint32_t *f;
-#endif
-#if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
-uint64_t *a;
-uint64_t *b;
-uint64_t *c;
-uint64_t *d;
 #endif
 
 size_t benchmark_get_cycle() { return read_csr(mcycle); }
@@ -53,10 +80,32 @@ int main() {
     f = (uint32_t *)snrt_l1alloc(TP_MUL * SNRT_VLEN * LMUL / 8);
 #endif
 #if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
-    a = (uint64_t *)snrt_l1alloc(53 * 8); // Byte size
-    b = (uint64_t *)snrt_l1alloc(53 * 8);
-    c = (uint64_t *)snrt_l1alloc(53 * 8);
-    d = (uint64_t *)snrt_l1alloc(53 * 8);
+#if TEST_SEW_64 == 1
+    a_64 = (uint64_t *)snrt_l1alloc(53 * 8); // Byte size
+    b_64 = (uint64_t *)snrt_l1alloc(53 * 8);
+    c_64 = (uint64_t *)snrt_l1alloc(53 * 8);
+    d_64 = (uint64_t *)snrt_l1alloc(53 * 8);
+#endif
+#if TEST_SEW_32 == 1
+    a_32 = (uint32_t *)snrt_l1alloc(24 * 4); // Byte size
+    b_32 = (uint32_t *)snrt_l1alloc(24 * 4);
+    c_32 = (uint32_t *)snrt_l1alloc(24 * 4);
+    d_32 = (uint32_t *)snrt_l1alloc(24 * 4);
+#endif
+#if TEST_SEW_16 == 1
+    a_16 = (uint16_t *)snrt_l1alloc(11 * 2); // Byte size
+    b_16 = (uint16_t *)snrt_l1alloc(11 * 2);
+    c_16 = (uint16_t *)snrt_l1alloc(11 * 2);
+    d_16 = (uint16_t *)snrt_l1alloc(11 * 2);
+#endif
+//#if TEST_SEW_8 == 1
+//    a_8 = (uint8_t *)snrt_l1alloc(5); // Byte size
+//    b_8 = (uint8_t *)snrt_l1alloc(5);
+//    c_8 = (uint8_t *)snrt_l1alloc(5);
+//    d_8 = (uint8_t *)snrt_l1alloc(5);
+//    cst_0_8 = (uint8_t *)snrt_l1alloc(5);
+//    cst_1_8 = (uint8_t *)snrt_l1alloc(5);
+//#endif
 #endif
   }
 
@@ -74,10 +123,32 @@ int main() {
     snrt_dma_start_1d(f, &tp[1], TP_MUL * SNRT_VLEN * LMUL / 8);
 #endif
 #if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
-    snrt_dma_start_1d(a, tp_0, 53 * 8);
-    snrt_dma_start_1d(b, tp_1, 53 * 8);
-    snrt_dma_start_1d(c, tp_2, 53 * 8);
-    snrt_dma_start_1d(d, tp_3, 53 * 8);
+#if TEST_SEW_64 == 1
+    snrt_dma_start_1d(a_64, tp_0_s64, 53 * 8);
+    snrt_dma_start_1d(b_64, tp_1_s64, 53 * 8);
+    snrt_dma_start_1d(c_64, tp_2_s64, 53 * 8);
+    snrt_dma_start_1d(d_64, tp_3_s64, 53 * 8);
+#endif
+#if TEST_SEW_32 == 1
+    snrt_dma_start_1d(a_32, tp_0_s32, 24 * 4);
+    snrt_dma_start_1d(b_32, tp_1_s32, 24 * 4);
+    snrt_dma_start_1d(c_32, tp_2_s32, 24 * 4);
+    snrt_dma_start_1d(d_32, tp_3_s32, 24 * 4);
+#endif
+#if TEST_SEW_16 == 1
+    snrt_dma_start_1d(a_16, tp_0_s16, 11 * 2);
+    snrt_dma_start_1d(b_16, tp_1_s16, 11 * 2);
+    snrt_dma_start_1d(c_16, tp_2_s16, 11 * 2);
+    snrt_dma_start_1d(d_16, tp_3_s16, 11 * 2);
+#endif
+//#if TEST_SEW_8 == 1
+//    snrt_dma_start_1d(a_8, tp_0_s8, 5);
+//    snrt_dma_start_1d(b_8, tp_1_s8, 5);
+//    snrt_dma_start_1d(c_8, tp_2_s8, 5);
+//    snrt_dma_start_1d(d_8, tp_3_s8, 5);
+//    snrt_dma_start_1d(cst_0_8, cst_0_s8, 5);
+//    snrt_dma_start_1d(cst_1_8, cst_1_s8, 5);
+//#endif
 #endif
     snrt_dma_wait_all();
   }
@@ -94,8 +165,21 @@ int main() {
     test_mix(e, f);
 #endif
 #if TEST_TARGET == TEST_GIZO || TEST_TARGET == TEST_ALL
-    test_gizo(cst_0, cst_1, a, b, c, d);
+#if TEST_SEW_64 == 1
+    test_gizo_64(cst_0_s64, cst_1_s64, a_64, b_64, c_64, d_64);
 #endif
+#if TEST_SEW_32 == 1
+    test_gizo_32(cst_0_s32, cst_1_s32, a_32, b_32, c_32, d_32);
+#endif
+#if TEST_SEW_16 == 1
+    test_gizo_16(cst_0_s16, cst_1_s16, a_16, b_16, c_16, d_16);
+#endif
+//#if TEST_SEW_8 == 1
+//    test_gizo_8(cst_0_8, cst_1_8, a_8, b_8, c_8, d_8);
+//#endif
+#endif
+
+// TODO: add test with vstart and thing on the tag to have bits with 1111...
 
     // Wait for all cores to finish
     snrt_cluster_hw_barrier();

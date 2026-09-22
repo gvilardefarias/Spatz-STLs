@@ -1,4 +1,3 @@
-
 // Copyright 2026 Politecnico di Torino
 //
 // SPDX-License-Identifier: Apache-2.0

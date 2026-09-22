@@ -17,15 +17,11 @@
 // Author: Gustavo Vilar de Farias, Politecnico di Torino, Italy
 
 #include "riscv_vec_defs.c"
+#include "riscv_float_defs.c"
 #include <stdint.h>
 
 #ifndef STLS_H
 #define STLS_H
-
-typedef union {
-    double d;
-    uint64_t i;
-} DoubleInt;
 
 #define VLMAX_32 (SNRT_VLEN / 32) * LMUL
 
@@ -37,24 +33,24 @@ typedef union {
 
 // Define test sew
 #if TEST_SEW == 0 // All SEWs
-    #define TEST_SEW_8  1
-    #define TEST_SEW_16 1
-    #define TEST_SEW_32 1
-    #define TEST_SEW_64 1
+    #define TEST_SEW_8   1  // Includes alt8
+    #define TEST_SEW_16  1
+    #define TEST_SEW_32  1
+    #define TEST_SEW_64  1
 
     #define TEST_START_SEW E64
 #elif TEST_SEW == 72
-    #define TEST_SEW_8  1
-    #define TEST_SEW_16 0
-    #define TEST_SEW_32 0
-    #define TEST_SEW_64 1
+    #define TEST_SEW_8   1
+    #define TEST_SEW_16  0
+    #define TEST_SEW_32  0
+    #define TEST_SEW_64  1
 
     #define TEST_START_SEW E64
 #else
-    #define TEST_SEW_64 (TEST_SEW == 64)
-    #define TEST_SEW_32 (TEST_SEW == 32)
-    #define TEST_SEW_16 (TEST_SEW == 16)
-    #define TEST_SEW_8  (TEST_SEW ==  8)
+    #define TEST_SEW_64  (TEST_SEW ==  64)
+    #define TEST_SEW_32  (TEST_SEW ==  32)
+    #define TEST_SEW_16  (TEST_SEW ==  16) // Includes alt16
+    #define TEST_SEW_8   (TEST_SEW ==   8)
     
     #if TEST_SEW_8 == 1
         #define TEST_START_SEW E8
@@ -75,19 +71,39 @@ int test_gizo(uint64_t cst_0, uint64_t cst_1, uint64_t* tp_0, uint64_t* tp_1, ui
 
 #if TEST_TARGET == TEST_ALL || TEST_TARGET == TEST_MIX
     #define test_op() vfmul_vv_v16_v0_v8(); \
+                      vfmadd_vv_v16_v0_v8(); \
                       vfadd_vv_v16_v0_v8(); \
+                      vfmsub_vv_v16_v0_v8(); \
                       vfsub_vv_v16_v0_v8(); 
     // TODO add the other functions and mode
     #define test_op_f_v8(d) vfsub_vf_v16_v8(d); \
                             vfadd_vf_v16_v8(d); \
                             vfmul_vf_v16_v8(d); // TODO increase it
+
+    #define test_red_op() vfredusum_vs_v16_v0_v8();
+
+    #define test_narrow_op() vfnmadd_vv_v16_v0_v8();
+
+    #define test_widen_op() vfwsub_wv_v16_v0_v8(); \
+                            vfwmul_vv_v16_v0_v8();
+    
+    #define test_widen_red_op() vfwredusum_vs_v16_v0_v8();
 #elif TEST_TARGET == TEST_GIZO
     #define test_op() vfmul_vv_v16_v0_v8(); \
+                      vfmadd_vv_v16_v0_v8(); \
                       vfadd_vv_v16_v0_v8(); \
+                      vfmsub_vv_v16_v0_v8(); \
                       vfsub_vv_v16_v0_v8(); 
     #define test_op_f_v8(d) vfsub_vf_v16_v8(d); \
                             vfadd_vf_v16_v8(d); \
                             vfmul_vf_v16_v8(d);
+
+    #define test_red_op() vfredusum_vs_v16_v0_v8();
+
+    #define test_narrow_op() vfnmadd_vv_v16_v0_v8();
+
+    #define test_widen_op() vfwsub_wv_v16_v0_v8(); \
+                            vfwmul_vv_v16_v0_v8();
 #endif
 
 #endif
