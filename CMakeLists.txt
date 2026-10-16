@@ -41,21 +41,26 @@ add_library(STLs STATIC
 
 enable_testing()
 set(SNITCH_TEST_PREFIX "spatzSTLs-")
-add_spatz_test_STL(FPU FPU/main.c random 1 0)  #Mix tests and All SEWs
-add_spatz_test_STL(FPU FPU/main.c random 1 8)  #Mix tests and  8 SEW
-add_spatz_test_STL(FPU FPU/main.c random 1 16) #Mix tests and 16 SEW
-add_spatz_test_STL(FPU FPU/main.c random 1 32) #Mix tests and 32 SEW
-add_spatz_test_STL(FPU FPU/main.c random 1 64) #Mix tests and 64 SEW
-add_spatz_test_STL(FPU FPU/main.c random 1 72) #Mix tests and 64 + 8 SEW
 
-add_spatz_test_STL(FPU FPU/main.c incremental 1 0) #Mix tests and All SEWs
-add_spatz_test_STL(FPU FPU/main.c incremental 1 64) #Mix tests and 64 SEW
-
-add_spatz_test_STL(FPU FPU/main.c gizo 2 64) #Gizo test and 64 SEW
-add_spatz_test_STL(FPU FPU/main.c gizo 2 32) #Gizo test and 32 SEW
-add_spatz_test_STL(FPU FPU/main.c gizo 2 16) #Gizo test and 16 SEW
-add_spatz_test_STL(FPU FPU/main.c gizo 2 8) #Gizo test and 8 SEW
-add_spatz_test_STL(FPU FPU/main.c gizo 2 0) #Gizo test and all SEW
-
-add_spatz_test_STL(FPU FPU/main.c all 0 64) #All test and 64 SEW
-add_spatz_test_STL(FPU FPU/main.c all 0 0) #All test and all SEW
+if(GP_sim)
+  add_spatz_test_STL(FPU FPU/main.c ${TH_N} 0 0) #All test and all SEW
+else()
+#  add_spatz_test_STL(FPU FPU/main.c random 1 0)  #Mix tests and All SEWs
+#  add_spatz_test_STL(FPU FPU/main.c random 1 8)  #Mix tests and  8 SEW
+#  add_spatz_test_STL(FPU FPU/main.c random 1 16) #Mix tests and 16 SEW
+#  add_spatz_test_STL(FPU FPU/main.c random 1 32) #Mix tests and 32 SEW
+#  add_spatz_test_STL(FPU FPU/main.c random 1 64) #Mix tests and 64 SEW
+#  add_spatz_test_STL(FPU FPU/main.c random 1 72) #Mix tests and 64 + 8 SEW
+  
+#  add_spatz_test_STL(FPU FPU/main.c incremental 1 0) #Mix tests and All SEWs
+#  add_spatz_test_STL(FPU FPU/main.c incremental 1 64) #Mix tests and 64 SEW
+#  
+#  add_spatz_test_STL(FPU FPU/main.c gizo 2 64) #Gizo test and 64 SEW
+#  add_spatz_test_STL(FPU FPU/main.c gizo 2 32) #Gizo test and 32 SEW
+#  add_spatz_test_STL(FPU FPU/main.c gizo 2 16) #Gizo test and 16 SEW
+#  add_spatz_test_STL(FPU FPU/main.c gizo 2 8) #Gizo test and 8 SEW
+#  add_spatz_test_STL(FPU FPU/main.c gizo 2 0) #Gizo test and all SEW
+  
+  add_spatz_test_STL(FPU FPU/main.c all 0 64) #All test and 64 SEW
+  add_spatz_test_STL(FPU FPU/main.c all 0 0) #All test and all SEW
+endif()

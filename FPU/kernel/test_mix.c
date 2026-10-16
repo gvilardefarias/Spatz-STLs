@@ -41,6 +41,7 @@ int test_mix(uint32_t *a, uint32_t *b){
 
   // TODO: use safe procedures when FPU count is bigger than 2 ?
   for(int i = 0;i < TP_MUL;i++){
+    /*
     if(i == 2){
       printf("original: \n");
       for(int j = 0;j < 64;j++){
@@ -48,6 +49,7 @@ int test_mix(uint32_t *a, uint32_t *b){
       }
       printf("\n");
     }
+    */
 
     tp_load_mix(a, b);
     fsrm((i + 1)%5);  // Starting with 1 so with 4 TP_MUL we arrive until 4 and exercise all the bits
@@ -128,6 +130,7 @@ int test_mix(uint32_t *a, uint32_t *b){
       test_widen_procedure_32(&a_strd, &b_strd);
     #endif
 
+    /*
     if(i == 2){
       uint64_t test[64];
       vse64_v8(test);
@@ -137,6 +140,7 @@ int test_mix(uint32_t *a, uint32_t *b){
       }
       printf("\n");
     }
+    */
 
     #if TP_MUL > 1 
       a += VLMAX_32;

@@ -35,7 +35,7 @@ inline void tp_load_8(uint8_t *a, uint8_t *b){
   vle8_v8(b);
 }
 
-inline void test_procedure_64(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_procedure_64(uint8_t **a, uint8_t **b){
   test_op();
   #if SNRT_NFPU_PER_CORE > 1
     for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
@@ -49,46 +49,44 @@ inline void test_procedure_64(uint8_t **a, uint8_t **b){
     }
   #endif
 }
-inline void test_procedure_32(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_procedure_32(uint8_t **a, uint8_t **b){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down32_v0(*((uint32_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down32_v8(*((uint32_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*2; i++){
+    vslide1down32_v0(*((uint32_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down32_v8(*((uint32_t*) (*b) ));
 
-      *a += 4;
-      *b += 4;
+    *a += 4;
+    *b += 4;
 
-      test_op();
-    }
-  #endif
+    test_op();
+  }
 }
-inline void test_procedure_16(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_procedure_16(uint8_t **a, uint8_t **b){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down16_v0(*((uint16_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down16_v8(*((uint16_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*4; i++){
+    vslide1down16_v0(*((uint16_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down16_v8(*((uint16_t*) (*b) ));
 
-      *a += 2;
-      *b += 2;
+    *a += 2;
+    *b += 2;
 
-      test_op();
-    }
-  #endif
+    test_op();
+  }
 }
-inline void test_procedure_8(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_procedure_8(uint8_t **a, uint8_t **b){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down8_v0(**(a)); // i is equal to the number of strides performed
-      vslide1down8_v8(**(b));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*8; i++){
+    vslide1down8_v0(**(a)); // i is equal to the number of strides performed
+    vslide1down8_v8(**(b));
 
-      *a += 1;
-      *b += 1;
+    *a += 1;
+    *b += 1;
 
-      test_op();
-    }
+    test_op();
+  }
 
 //    #if SNRT_NFPU_PER_CORE % 2 == 0
 //      vslide1down8_v0(**(a));
@@ -97,9 +95,8 @@ inline void test_procedure_8(uint8_t **a, uint8_t **b){
 //      *a += 1;
 //      *b += 1;
 //    #endif
-  #endif
 }
-inline void test_narrow_procedure_64(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_narrow_procedure_64(uint8_t **a, uint8_t **b){
   test_narrow_op();
   #if SNRT_NFPU_PER_CORE > 1
     for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
@@ -113,46 +110,44 @@ inline void test_narrow_procedure_64(uint8_t **a, uint8_t **b){
     }
   #endif
 }
-inline void test_narrow_procedure_32(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_narrow_procedure_32(uint8_t **a, uint8_t **b){
   test_narrow_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down32_v0(*((uint32_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down32_v8(*((uint32_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*2; i++){
+    vslide1down32_v0(*((uint32_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down32_v8(*((uint32_t*) (*b) ));
 
-      *a += 4;
-      *b += 4;
+    *a += 4;
+    *b += 4;
 
-      test_narrow_op();
-    }
-  #endif
+    test_narrow_op();
+  }
 }
-inline void test_narrow_procedure_16(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_narrow_procedure_16(uint8_t **a, uint8_t **b){
   test_narrow_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down16_v0(*((uint16_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down16_v8(*((uint16_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*4; i++){
+    vslide1down16_v0(*((uint16_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down16_v8(*((uint16_t*) (*b) ));
 
-      *a += 2;
-      *b += 2;
+    *a += 2;
+    *b += 2;
 
-      test_narrow_op();
-    }
-  #endif
+    test_narrow_op();
+  }
 }
-inline void test_narrow_procedure_8(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_narrow_procedure_8(uint8_t **a, uint8_t **b){
   test_narrow_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down8_v0(**(a)); // i is equal to the number of strides performed
-      vslide1down8_v8(**(b));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*8; i++){
+    vslide1down8_v0(**(a)); // i is equal to the number of strides performed
+    vslide1down8_v8(**(b));
 
-      *a += 1;
-      *b += 1;
+    *a += 1;
+    *b += 1;
 
-      test_narrow_op();
-    }
+    test_narrow_op();
+  }
 
 //    #if SNRT_NFPU_PER_CORE % 2 == 0
 //      vslide1down8_v0(**(a));
@@ -161,9 +156,8 @@ inline void test_narrow_procedure_8(uint8_t **a, uint8_t **b){
 //      *a += 1;
 //      *b += 1;
 //    #endif
-  #endif
 }
-inline void test_widen_procedure_64(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_widen_procedure_64(uint8_t **a, uint8_t **b){
   test_widen_op();
   #if SNRT_NFPU_PER_CORE > 1
     for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
@@ -177,46 +171,44 @@ inline void test_widen_procedure_64(uint8_t **a, uint8_t **b){
     }
   #endif
 }
-inline void test_widen_procedure_32(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_widen_procedure_32(uint8_t **a, uint8_t **b){
   test_widen_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down32_v0(*((uint32_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down32_v8(*((uint32_t*) (*b) ));
 
-      *a += 4;
-      *b += 4;
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*2; i++){
+    vslide1down32_v0(*((uint32_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down32_v8(*((uint32_t*) (*b) ));
 
-      test_widen_op();
-    }
-  #endif
+    *a += 4;
+    *b += 4;
+
+    test_widen_op();
+  }
 }
-inline void test_widen_procedure_16(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_widen_procedure_16(uint8_t **a, uint8_t **b){
   test_widen_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down16_v0(*((uint16_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down16_v8(*((uint16_t*) (*b) ));
 
-      *a += 2;
-      *b += 2;
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*4; i++){
+    vslide1down16_v0(*((uint16_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down16_v8(*((uint16_t*) (*b) ));
 
-      test_widen_op();
-    }
-  #endif
+    *a += 2;
+    *b += 2;
+
+    test_widen_op();
+  }
 }
-inline void test_widen_procedure_8(uint8_t **a, uint8_t **b){
+__attribute__((always_inline)) inline void test_widen_procedure_8(uint8_t **a, uint8_t **b){
   test_widen_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down8_v0(**(a)); // i is equal to the number of strides performed
-      vslide1down8_v8(**(b));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*8; i++){
+    vslide1down8_v0(**(a)); // i is equal to the number of strides performed
+    vslide1down8_v8(**(b));
 
-      *a += 1;
-      *b += 1;
+    *a += 1;
+    *b += 1;
 
-      test_widen_op();
-    }
+    test_widen_op();
+  }
 
 //    #if SNRT_NFPU_PER_CORE % 2 == 0
 //      vslide1down8_v0(**(a));
@@ -225,79 +217,74 @@ inline void test_widen_procedure_8(uint8_t **a, uint8_t **b){
 //      *a += 1;
 //      *b += 1;
 //    #endif
-  #endif
 }
 
-inline void safe_test_procedure_64(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
+__attribute__((always_inline)) inline void safe_test_procedure_64(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down64_v0(*( (uint64_t*) (*a))); // i is equal to the number of strides performed
-      vslide1down64_v8(*( (uint64_t*) (*b)));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
+    vslide1down64_v0(*( (uint64_t*) (*a))); // i is equal to the number of strides performed
+    vslide1down64_v8(*( (uint64_t*) (*b)));
 
-      *a += 8;
-      *b += 8;
+    *a += 8;
+    *b += 8;
 
-      if(*a >= a_end) *a = a_start;
-      if(*b >= b_end) *b = b_start;
+    if(*a >= a_end) *a = a_start;
+    if(*b >= b_end) *b = b_start;
 
-      test_op();
-    }
-  #endif
+    test_op();
+  }
 }
-inline void safe_test_procedure_32(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
+__attribute__((always_inline)) inline void safe_test_procedure_32(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down32_v0(*( (uint32_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down32_v8(*( (uint32_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*2; i++){
+    vslide1down32_v0(*( (uint32_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down32_v8(*( (uint32_t*) (*b) ));
 
-      *a += 4;
-      *b += 4;
+    *a += 4;
+    *b += 4;
 
-      if(*a >= a_end) *a = a_start;
-      if(*b >= b_end) *b = b_start;
+    if(*a >= a_end) *a = a_start;
+    if(*b >= b_end) *b = b_start;
 
-      test_op();
-    }
-  #endif
+    test_op();
+  }
 }
-inline void safe_test_procedure_16(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
+__attribute__((always_inline)) inline void safe_test_procedure_16(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down16_v0(*( (uint16_t*) (*a) )); // i is equal to the number of strides performed
-      vslide1down16_v8(*( (uint16_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*4; i++){
+    vslide1down16_v0(*( (uint16_t*) (*a) )); // i is equal to the number of strides performed
+    vslide1down16_v8(*( (uint16_t*) (*b) ));
 
-      *a += 2;
-      *b += 2;
+    *a += 2;
+    *b += 2;
 
-      if(*a >= a_end) *a = a_start;
-      if(*b >= b_end) *b = b_start;
+    if(*a >= a_end) *a = a_start;
+    if(*b >= b_end) *b = b_start;
 
-      test_op();
-    }
-  #endif
+    test_op();
+  }
 }
-inline void safe_test_procedure_8(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
+__attribute__((always_inline)) inline void safe_test_procedure_8(uint8_t** a, uint8_t** b, uint8_t* a_start, uint8_t* b_start, uint8_t* a_end, uint8_t* b_end){
   test_op();
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down8_v0(**a); // i is equal to the number of strides performed
-      vslide1down8_v8(**b);
 
-      *a += 1;
-      *b += 1;
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*8; i++){
+    vslide1down8_v0(**a); // i is equal to the number of strides performed
+    vslide1down8_v8(**b);
 
-      if(*a >= a_end) *a = a_start;
-      if(*b >= b_end) *b = b_start;
+    *a += 1;
+    *b += 1;
 
-      test_op();
-    }
-  #endif
+    if(*a >= a_end) *a = a_start;
+    if(*b >= b_end) *b = b_start;
+
+    test_op();
+  }
 }
 
-inline void safe_test_procedure64_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b_end, double d){
+__attribute__((always_inline)) inline void safe_test_procedure64_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b_end, double d){
   test_op_f_v8(d);
   #if SNRT_NFPU_PER_CORE > 1
     for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
@@ -312,36 +299,34 @@ inline void safe_test_procedure64_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b
   #endif
 }
 // TODO: fix it to be float and so on
-inline void safe_test_procedure32_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b_end, double d){
+__attribute__((always_inline)) inline void safe_test_procedure32_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b_end, double d){
   test_op_f_v8(d);
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down32_v8(*( (uint32_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*2; i++){
+    vslide1down32_v8(*( (uint32_t*) (*b) ));
 
-      *b += 4;
+    *b += 4;
 
-      if(*b >= b_end) *b = b_start;
+    if(*b >= b_end) *b = b_start;
 
-      test_op_f_v8(d);
-    }
-  #endif
+    test_op_f_v8(d);
+  }
 }
-inline void safe_test_procedure16_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b_end, double d){
+__attribute__((always_inline)) inline void safe_test_procedure16_f_v8(uint8_t** b, uint8_t* b_start, uint8_t* b_end, double d){
   test_op_f_v8(d);
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down16_v8(*( (uint16_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*4; i++){
+    vslide1down16_v8(*( (uint16_t*) (*b) ));
 
-      *b += 2;
+    *b += 2;
 
-      if(*b >= b_end) *b = b_start;
+    if(*b >= b_end) *b = b_start;
 
-      test_op_f_v8(d);
-    }
-  #endif
+    test_op_f_v8(d);
+  }
 }
 
-inline void test_procedure64_f_v8(uint8_t** b, double d){
+__attribute__((always_inline)) inline void test_procedure64_f_v8(uint8_t** b, double d){
   test_op_f_v8(d);
   #if SNRT_NFPU_PER_CORE > 1
     for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
@@ -353,27 +338,25 @@ inline void test_procedure64_f_v8(uint8_t** b, double d){
     }
   #endif
 }
-inline void test_procedure32_f_v8(uint8_t** b, double d){
+__attribute__((always_inline)) inline void test_procedure32_f_v8(uint8_t** b, double d){
   test_op_f_v8(d);
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down64_v8(*( (uint32_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*2; i++){
+    vslide1down64_v8(*( (uint32_t*) (*b) ));
 
-      *b += 4;
+    *b += 4;
 
-      test_op_f_v8(d);
-    }
-  #endif
+    test_op_f_v8(d);
+  }
 }
-inline void test_procedure16_f_v8(uint8_t** b, double d){
+__attribute__((always_inline)) inline void test_procedure16_f_v8(uint8_t** b, double d){
   test_op_f_v8(d);
-  #if SNRT_NFPU_PER_CORE > 1
-    for(int i = 1; i < SNRT_NFPU_PER_CORE; i++){
-      vslide1down16_v8(*( (uint16_t*) (*b) ));
+  
+  for(int i = 1; i < SNRT_NFPU_PER_CORE*4; i++){
+    vslide1down16_v8(*( (uint16_t*) (*b) ));
 
-      *b += 2;
+    *b += 2;
 
-      test_op_f_v8(d);
-    }
-  #endif
+    test_op_f_v8(d);
+  }
 }
